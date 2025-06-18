@@ -69,6 +69,44 @@ def process_worker(load_queue,semaphore,shm_counter_dict,shm_obj_dict,lock,shm_a
 
   label, bbox, shm_name, shape, dtype, save_dir,original_name = item
 
+  shm = shared_memory.SharedMemory(name = shm_name)
+  with lock:
+    shm_attach_counter[shm_name] -=1
+
+  original_organoids = np.ndarray(shape,dtype=dtype,buffer=shm.buf)
+
+  zmin, ymin, xmin, zmax, ymax, xmax = bbox
+  individual_organoid = (original_organoids[zmin:zmax, ymin:ymax, xmin:xmax])
+
+  root_name = original_name.split('.')[0]
+  sampleID = int(root_name.split('_')[1])
+
+  unique_organoid_id = cantor_pair(sampleID,label) #Note: sampleID comes first -- ORDER matters in this function
+
+  organoid_name = 'JAXLAB_' + f'{unique_organoid_id:03}' + '_0000.nii.gz'
+
+  # Save cropped
+  output_path = os.path.join(save_dir,organoid_name)
+  sitk.WriteImage(sitk.GetImageFromArray(individual_organoid), output_path)
+
+  shm.close()
+
+  with lock:
+      shm_counter_dict[shm_name] -= 1
+      # Only unlink when both counts reach zero
+      if shm_counter_dict[shm_name] == 0 and shm_attach_counter.get(shm_name, 0) == 0:
+          shm.unlink()
+          print('shared memory object released')
+          del shm_counter_dict[shm_name]
+          del shm_obj_dict[shm_name]
+          del shm_attach_counter[shm_name]
+
+    semaphore.release()
+
+
+
+
+
     
   
   
