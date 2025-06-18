@@ -1,6 +1,7 @@
 import os
 import SimpleITK as sitk
 from scipy.fftpack import fftn, fftshift
+from kneed import KneeLocator
 
 image_path = ''
 output_path =''
@@ -21,7 +22,34 @@ def get_3d_power_spectrum(image):
 
 #helper function for identifying the knee point of the power spectrum
 
+def radial_average_3d(power_spectrum):
+   """
+    Computes the radial average of a 3D power spectrum while maintaining an anisotropic scaling factor for z.
+    Do this because most images have a much smaller z dimnesion that x,y
+    """
+
+  dz,dy,dx = power_spectrum.shape
+  
+
+  
+#once you have the radial frequencies and power you can find at which frequency does power drop off
+
+def detect_knee_3d(radial_frequencies,radial_power):
+
+  nonzero_power_indices = radial_power > 0 #remove zero power regions b/c they are uninformative and can mess with knee detection
+  filtered_frequencies = radial_frequencies[nonzero_power_indices]
+  filtered_power = radial_power[nonzero_power_indices]
+
+  knee_locator = KneeLocator(filtered_frequencies,filtered_power,curve='convex',direction='decreasing')
+  return knee_locator.knee
+  
+
 def apply_knee_detection_3d(power_spectrum):
+
+  radial_frequencies, radial_power = radial_average_3d(power_spectrum)
+  knee_point = detect_knee_3d(radial_frequencies,radial_power)
+  
+  return knee_point
   
     
 
