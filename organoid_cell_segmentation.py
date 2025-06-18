@@ -8,6 +8,7 @@ percentile =
 frequencies = 
 sigma = 
 
+#function for computing the 3d power spectrum of an image
 
 def get_3d_power_spectrum(image):
 
@@ -17,6 +18,13 @@ def get_3d_power_spectrum(image):
   power_spectrum = np.abs(fft_image)**2 #square the shifted fft to get the power spectrum
 
   return power_spectrum
+
+#helper function for identifying the knee point of the power spectrum
+
+def apply_knee_detection_3d(power_spectrum):
+  
+    
+
   
 
 #You should first segment images using organoid_segmentation.py and running through nnUNetv2, and crop_images.py
@@ -31,7 +39,7 @@ num_z_layers = grayscale_image.shape[0]
 #obtain the power spectrum for the image
 #use the power spectrum and a knee point algorithm to identify the cutoff
 
-power_spectrum = loadFunctions.get_3d_power_spectrum(grayscale_image)
+power_spectrum = get_3d_power_spectrum(grayscale_image)
 knee_frequency_high_pass = loadFunctions.apply_knee_detection_3d(power_spectrum)
 
 
