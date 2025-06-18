@@ -5,9 +5,12 @@ from kneed import KneeLocator
 
 image_path = ''
 output_path =''
-percentile = 
-frequencies = 
-sigma = 
+percentile = ''
+frequencies = ''
+sigma = ''
+
+#You should first segment images using organoid_segmentation.py and running through nnUNetv2, and crop_images.py
+#place sample image into a folder and use this script to autosegment it
 
 #function for computing the 3d power spectrum of an image
 
@@ -29,7 +32,37 @@ def radial_average_3d(power_spectrum):
     """
 
   dz,dy,dx = power_spectrum.shape
-  
+  center = (dz // 2, dy //2 , dx //2)
+  z_scale = (dz/max(dy,dx)) # adjust for the aspect ratio
+  z,y,x = np.indices([dz,dy,dx])
+  aspect_ratio = dx/dy 
+
+  # compute radial distances
+  radius = np.sqrt((x - center[2]) ** 2 + ((y - center[1])* aspect_ratio) ** 2 + ((z - center[0]) * z_scale) ** 2)
+
+  #flatten and sort power spectrum by radial distances
+  radial_indices = np.argsort(radius.flat)
+  radial_distances = radius.flat[radial_indices]
+  sorted_power_spectrum = power_spectrum.flat[radial_indices]
+
+     # Filter out zero power values
+    nonzero_indices = sorted_power_spectrum > 0
+    radial_distances = radial_distances[nonzero_indices]
+    sorted_power_spectrum = sorted_power_spectrum[nonzero_indices]
+
+    # Compute radial bins and average power per bin
+    radial_bins = np.arange(0, np.max(radial_distances), 1)
+    radial_power = np.zeros_like(radial_bins, dtype=np.float64)
+    counts = np.zeros_like(radial_bins)
+
+    for i, r in enumerate(np.floor(radial_distances).astype(int)):
+        radial_power[r] += sorted_power_spectrum[i]
+        counts[r] += 1
+
+    counts[counts == 0] = 1  # Avoid division by zero
+    radial_power /= counts  # Normalize
+
+    return radial_bins, radial_power
 
   
 #once you have the radial frequencies and power you can find at which frequency does power drop off
@@ -51,12 +84,8 @@ def apply_knee_detection_3d(power_spectrum):
   
   return knee_point
   
-    
 
-  
 
-#You should first segment images using organoid_segmentation.py and running through nnUNetv2, and crop_images.py
-#place sample image into a folder and use this script to autosegment it
 
 grayscale_image = sitk.ReadImage(image_path)
 grayscale_image = sitk.GetArrayFromImage(grayscale_image)
