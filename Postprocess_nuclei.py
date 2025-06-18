@@ -2,6 +2,8 @@ from skimage.measure import label,regionprops
 from skimage.morphology import closing,erosion, dilation
 from scipy.ndimage import binary_fill_holes
 import numpy as np
+from multiprocessing import Queue, Lock,Process
+import os
 
 
 def find_overlap(component1, component2):
@@ -157,14 +159,68 @@ def merge_small_with_big(segmented_organoid_cropped):
         
 def process_image(args,lock):
 
-  predicted_image_name,results_folder_path,cleaned_segmentation_folder_path,x_spacing,y_spacing,z_spacing,original_study,json_output_path = args
+  predicted_image_name,results_folder_path,cleaned_segmentation_folder_path,x_spacing,y_spacing,z_spacing,json_output_path = args
 
   predicted_image_path = os.path.join(results_folder_path,predicted_image_name)
   predicted_image = sitk.ReadImage(predicted_image_path)
   predicted_image = sitk.GetArrayFromImage(predicted_image)
 
   predicted_image = merge_small_with_big(predicted_image)
+  predicted_image = label_merge_components_3d(predicted_image)
+  organoid_cell_count = len(np.unique(predicted_image)) - (1 if 0 in predicted_image else 0)
 
+  properties = regionprops(predicted_image)
+
+  
+    for prop in properties:
+        minz, miny, minx, maxz, maxy, maxx = prop.bbox
+        cropped_nucleus = predicted_image[minz:maxz, miny:maxy, minx:maxx]
+
+        if cropped_nucleus.ndim != 3:
+            continue  # or handle differently if needed
+
+        z,y,x = cropped_nucleus.shape
+        z_physical = z * z_spacing
+        y_physical = y * y_spacing
+        x_physical = x * x_spacing
+        nuclear_volume = z_physical * y_physical * x_physical
+        nuclear_volumes.append(nuclear_volume)
+
+
+    cleaned_output_path = os.path.join(cleaned_segmentation_folder_path,predicted_image_name)
+
+    z,y,x = predicted_image.shape
+    z_physical = z * z_spacing
+    y_physical = y * y_spacing
+    x_physical = x * x_spacing
+
+    # Physical volume
+    organoid_volume = z_physical * y_physical * x_physical
+
+    if organoid_volume >=45000:
+
+        predicted_image = sitk.GetImageFromArray(predicted_image)
+        sitk.WriteImage(predicted_image,cleaned_output_path)
+        print('image written')
+
+        results = {
+            'Image ID' :predicted_image_name,
+            'Organoid Count': organoid_cell_count,
+            'Organoid Volume': organoid_volume,
+            'Nuclear Volumes': nuclear_volumes
+        }
+
+
+        with lock:
+            with open(json_output_path, "a") as f:
+                    json.dump(results, f)
+                    f.write("\n")  # Each result
+                    f.flush()
+
+        del results
+
+    del predicted_image,nuclear_volumes,organoid_volume # can sometimes hold memory even after the process terminates, so just to be sure
+    gc.collect()
 
 
 
@@ -176,5 +232,41 @@ def worker(input_queue,lock):
       
     process_image(args,lock)
 
+
+def run_pipeline(args_list,num_workers=16):
+    input_queue = Queue(maxsize=1000) #adjust this and num_workers based on your RAM size
+    lock = Lock() #going to have multiple processes writing to the same json
+    workers = []
+
+    for _ in range(num_workers):
+        p = Process(target=worker,args=(input_queue,lock_))
+        p.start()
+        workers.append(p)
+
+    for args in args_list:
+        input_queue.put(args)
+
+    for _ in range(num_workers):
+        input_queue.put(None)
+
+    for p in workers:
+        p.join()
+
+x_spacing = ''
+y_spacing = ''
+z_spacing = ''
+json_output_path = ''
+
+
+segmented_organoids_directory = ''
+
+post_processed_directory = ''
+
+images_list = os.listdir(segmented_organoid_directory)
+images_list = [image for image in images_list if image.endswith('.nii.gz')]
+
+temp_args = [(predicted_image_name,segmented_organoids_directory,post_processed_directory, x_spacing,y_spacing,z_spacing,json_output_path) for predicted_image_name in images_list]
+    
+run_pipeline(args_list = temp_args,num_workers = 32)
 
 
