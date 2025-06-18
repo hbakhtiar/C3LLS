@@ -2,10 +2,10 @@
 import os
 import SimpleITK as sitk
 import numpy as np
-from skimage.filters import threshold_triangle, threshold_otsu
+from skimage.filters import threshold_triangle, threshold_otsu, gaussian
 from skimage.measure import regionprops
 from skimage.morphology import remove_small_objects
-
+from scipy.ndimage import distance_transform_edt
 
 
 #function for performing triangle thresholding
@@ -20,16 +20,15 @@ def triangle_threshold_4_binary(image):
 #Image should have format (z,y,x)
 
 images_folder = ''
-saveImage = ''
-nuclear_stain = ''
+output_path =''
 minimum_size = ''
+sigma = ''
 
 images_2_segment_list = os.listdir(images_folder)
 images_2_segment_list = [image_name for image_name in images_2_segment_list if image_name.endswith('.nii.gz')]
 
 if images_2_segment_list is None:
   raise ValueError("Image folder empty or files aren't in .nii.gz format")
-
 
 for image_name in image_2_segment_list:
 
@@ -70,26 +69,29 @@ for image_name in image_2_segment_list:
         for region in regions:
             volume_list.append(region.area)
 
-        if min_size is None:
+        if minimum_size is None:
           
           # Calculate the average volume of the regions, use average volume by default
           volume_array = np.asarray(volume_list)
-          min_size = np.mean(volume_array)
+          minimum_size = np.mean(volume_array)
 
-        # Remove regions smaller than the average volume
-        labeled_array_filtered = remove_small_objects(labeled_array, min_size=min_size) #
-        # labeled_array_filtered = labeled_array_filtered
+        # Remove regions smaller than specified volume
+        labeled_array_filtered = remove_small_objects(labeled_array, min_size=minimum_size) #
 
         # Convert the labeled array back to a binary image
         filtered_binary_image = (labeled_array_filtered > 0).astype(np.uint8)
 
         # 2. Perform the distance transform on the binary image
-        distance_transform = distance_transform_edt(labeled_array)
+        # use the distance transform to find the max distance as default sigma
+        if sigma is None:
+          distance_transform = distance_transform_edt(labeled_array)
+          sigma = np.max(distance_transform)
 
-
-        max_distance = np.max(distance_transform)
-
-        blurred_z = skimage.filters.gaussian(filtered_binary_image, sigma=max_distance/3)
-        segmented_layer = loadFunctions.triangle_threshold(blurred_z)
+        blurred_z = skimage.filters.gaussian(filtered_binary_image, sigma=sigma)
+        segmented_layer = triangle_threshold_4_binary(blurred_z)
         final_image[z,:,:] = segmented_layer
+
+    final_image = sitk.GetImageFromArray(final_image)
+    sitk.WriteImage(final_image,output_path)
+
 
