@@ -8,6 +8,7 @@ output_path =''
 percentile = ''
 frequencies = ''
 sigma = ''
+remove_background = ''
 
 #You should first segment images using organoid_segmentation.py and running through nnUNetv2, and crop_images.py
 #place sample image into a folder and use this script to autosegment it
@@ -83,8 +84,64 @@ def apply_knee_detection_3d(power_spectrum):
   knee_point = detect_knee_3d(radial_frequencies,radial_power)
   
   return knee_point
-  
 
+
+def apply_gaussian_low_pass_filter_3d(grayscale_image,cutoff):
+    """
+    Applies a Gaussian high-pass filter to a 3D image in the frequency domain.
+
+    Parameters:
+        image (np.ndarray): The 3D image to filter, shape (z, y, x).
+        cutoff (float): The standard deviation (sigma) for the Gaussian filter.
+        z_scaling (float): Factor to adjust the z-dimension distances (e.g., if z spacing is larger/smaller than xy spacing).
+
+    Returns:
+        np.ndarray: The filtered 3D image.
+    """
+
+    f_transform = fftn(image)
+    f_transform = fftshift(f_transform)
+
+    depth, rows, columns = image.shape
+    cdepth, crow, ccol = depth // 2, rows // 2, cols // 2
+
+    # Create a 3D mesh grid
+    Z, Y, X = np.ogrid[:depth, :rows, :cols]
+    
+    # Adjust the distance metric to keep the z-ratio in check
+    distance = np.sqrt(((X - ccol) ** 2) + ((Y - crow) ** 2) + ((Z - cdepth) ** 2) * (z_scaling ** 2))
+    
+    # Create the Gaussian low-pass filter
+    gaussian_filter = np.exp(-(distance ** 2) / (2 * (cutoff ** 2)))
+
+    # Apply the Gaussian low-pass filter in the frequency domain
+    f_transform_centered *= gaussian_filter
+    
+    # Shift zero frequency component back
+    f_transform_filtered = ifftshift(f_transform_centered)
+    
+    # Perform inverse 3D Fourier transform
+    filtered_image = np.abs(ifftn(f_transform_filtered))
+    
+    return filtered_image
+
+
+def log_gabor_3d_filter(shape, f0, sigma_f):
+    # Create a 3D meshgrid for the frequency domain
+    z, y, x = np.meshgrid(np.arange(-shape[0]//2, shape[0]//2), 
+                          np.arange(-shape[1]//2, shape[1]//2),
+                          np.arange(-shape[2]//2, shape[2]//2),
+                          indexing='ij')
+    
+    radius = np.sqrt(z**2 + y**2 + x**2)
+
+    center_z, center_y, center_x = [dim // 2 for dim in radius.shape]
+    radius[center_z, center_y, center_x] = 1
+    
+    # Create Log-Gabor filter
+    log_gabor = np.exp(-(np.log(radius / f0) ** 2) / (2 * np.log(sigma_f) ** 2))
+    log_gabor[radius < 1] = 0  # Remove low frequencies
+    return log_gabor
 
 
 grayscale_image = sitk.ReadImage(image_path)
@@ -93,66 +150,43 @@ grayscale_image = grayscale_image.astype(np.float32) #important for FFT
 
 num_z_layers = grayscale_image.shape[0]
 
+#if you want to try removing background noise use this code
 #obtain the power spectrum for the image
 #use the power spectrum and a knee point algorithm to identify the cutoff
 
-power_spectrum = get_3d_power_spectrum(grayscale_image)
-knee_frequency_high_pass = loadFunctions.apply_knee_detection_3d(power_spectrum)
+if remove_background is Not None:
 
+  power_spectrum = get_3d_power_spectrum(grayscale_image)
+  knee_point = apply_knee_detection_3d(power_spectrum)
+  
+  low_pass_image = loadFunctions.apply_gaussian_low_pass_filter_3d(grayscale_image,cutoff=knee_point)
+  foreground_binary_mask = np.zeros_like(low_pass_image)
 
-# # # Apply the filter in the frequency domain
-fft_img = fftshift(fftn(grayscale_image))
-# filtered_fft = fft_img * log_gabor
-# filtered_img = np.abs(ifftn(fftshift(filtered_fft)))
-
-max_freq = loadFunctions.get_max_frequency_cutoff(grayscale_image.shape)
-frequencies = np.arange(1,max_freq/7,1)
-
-
-
-low_pass_image = loadFunctions.apply_gaussian_low_pass_filter_3d(grayscale_image,cutoff=knee_frequency_high_pass)
-background_binary_mask = np.zeros_like(low_pass_image)
-foreground_binary_mask = np.zeros_like(low_pass_image)
-
-
-
-for z in range(num_z_layers):
-    layer_threshold = threshold_otsu(low_pass_image[z,:,:])
-    background_binary_mask[z,:,:] = low_pass_image[z,:,:] < layer_threshold
-    foreground_binary_mask[z,:,:] = low_pass_image[z,:,:] > layer_threshold
-
-
-sigma_values = np.arange(0.1, 2, .1)  # Test different sigma_f values
-best_snr = 0
-
-
-# for sigma_f in sigma_values:
-#     _, snr_values = loadFunctions.compute_snr(grayscale_image, background_binary_mask, frequencies, sigma_f=sigma_f)
-#     avg_snr = np.mean(snr_values)  # Take the mean SNR across frequencies
-    
-#     if avg_snr > best_snr:
-#         best_snr = avg_snr
-#         best_sigma = sigma_f
-
-best_sigma = .5
-
-# Compute SNR across frequencies
-#freqs, snr_values = loadFunctions.compute_snr(grayscale_image, background_binary_mask, frequencies, sigma_f=best_sigma)
-
-#frequencies = freqs[snr_values > 0]  # Choose frequencies where SNR > 1
+  for z in range(num_z_layers):
+      layer_threshold = threshold_otsu(low_pass_image[z,:,:])
+      foreground_binary_mask[z,:,:] = low_pass_image[z,:,:] > layer_threshold
 
 phase_response = []
 
+# # # Apply the filter in the frequency domain
+fft_img = fftshift(fftn(grayscale_image))
 
+#frequencies is a range that should be set by the user
+#sigma should be set by the user
 
 for f0 in frequencies:
 
-    log_gabor = loadFunctions.log_gabor_3d_filter(grayscale_image.shape, f0, sigma_f=best_sigma)
+    log_gabor = log_gabor_3d_filter(grayscale_image.shape, f0, sigma_f=sigma)
     filtered_fft = fft_img * log_gabor
     filtered_img = ifftn(filtered_fft)
-    phase_response.append(np.angle(filtered_img))  # Extract phase
+    phase_response.append(np.angle(filtered_img))  # Extract phase 
 
 phase_sum = np.sum(np.exp(1j * np.array(phase_response)), axis=0)
 phase_congruency_map = np.abs(phase_sum) / len(phase_response)  # Normalize
 threshold = np.percentile(phase_congruency_map,percentile)
-phase_congruency_map_binary = phase_congruency_map > threshold
+segmented_nuclei = phase_congruency_map > threshold
+
+segmented_nuclei = sitk.GetImageFromArray(segmneted_nuclei)
+sitk.WriteImage(segmented_nuclei,output_path)
+
+
