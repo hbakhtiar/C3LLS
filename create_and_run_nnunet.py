@@ -46,6 +46,47 @@ def construct_nnUNet_folders(base_dir,setID,setName):
     return directory_list
 
 
+
+def wait_for_files(file_list, timeout=6000, check_interval=10):
+    """Wait for the specific files to be created with a timeout."""
+    start_time = time.time()
+    while True:
+        if all(os.path.exists(file) for file in file_list):
+            print("All required files are created. Continuing with other folds.")
+            return True
+        if time.time() - start_time > timeout:
+            print("Timeout reached while waiting for required files.")
+            return False
+        time.sleep(check_interval)
+
+def extract_unique_names_with_npy(directory_path):
+    """
+    Extracts unique base names from files in a given directory, excluding their file extensions, 
+    and appends '.npy' to each unique name.
+    
+    Args:
+    - directory_path (str): The path to the directory containing the files.
+    
+    Returns:
+    - unique_npy_names (set): A set of unique base names with '.npy' appended.
+    """
+    unique_npy_names = set()
+
+    # Iterate through each file in the directory
+    for filename in os.listdir(directory_path):
+        # Get the base name without the extension
+        base_name = os.path.splitext(filename)[0]
+        # Append '.npy' to the base name
+        npy_name = f"{base_name}.npy"
+        # Add to the set of unique names
+        npy_name = os.path.join(directory_path,npy_name)
+        unique_npy_names.add(npy_name)
+
+
+    return list(unique_npy_names)
+
+
+
 #Their code is predominantly run through CLI - want to integrate it directly here
 # set the command and launch as a subrocess 
 # Used these defaults, but their setup is highly configurable
@@ -69,6 +110,11 @@ print(result.stderr)
 
 def train(folds,gpu_ids,setName_and_ID,setID,trainer,configuration='3d_fullres'):
 
+  preprocessed_folder = os.environ['nnUNet_preprocessed']
+  unique_names_folder = os.path.join(preprocessed_folder,setName_and_ID,'nnUNetPlans_3d_fullres')
+
+  required_files = extract_unique_names_with_npy(unique_names_folder)
+  
   env = os.environ.copy()
   env['CUDA_VISIBLE_DEVICES'] = str(first_gpu_id)  # Assign specific GPU
   env['nnUNet_n_proc_DA'] = '8'
@@ -80,12 +126,14 @@ def train(folds,gpu_ids,setName_and_ID,setID,trainer,configuration='3d_fullres')
         str(first_fold),
         '-p', 'nnUNetResEncUNetLPlans',
         '-tr', str(trainer),
-        '--npz'
+        '--npz' # note that i did this by default, but may want to remove if you don't have enough space 
     ], stdout=subprocess.PIPE, stderr=subprocess.PIPE, text=True, env=env)
 
-    # Start a thread to handle the output from the fold
+    # Start a thread to handle the output from the first fold
     output_thread = Thread(target=handle_first_fold_output, args=(first_process, first_fold))
     output_thread.start() #handle the output 
+
+
 
 
 
