@@ -10,14 +10,15 @@ from scipy.ndimage import distance_transform_edt
 
 #function for performing triangle thresholding
 #uses threshold_triangle to get threshold, then converts image to binary
+#uses SITK for image writing/reading, assumes nii.gz format
+#adjust to proper image read/writer as needed
+#note that assumes images are grayscaled - simply use the nuclear stain channel to grayscale
 
 def triangle_threshold_4_binary(image):
   threshold = threshold_triangle(image)
   binary_image = (image > threshold).astype(np.uint8)
   return binary_image
 
-#Images should be converted to .nii.gz format, with only nuclear stain channel
-#Image should have format (z,y,x)
 
 images_folder = ''
 output_path =''
