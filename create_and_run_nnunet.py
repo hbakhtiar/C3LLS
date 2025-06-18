@@ -11,7 +11,7 @@ setName = ''
 # has specific requirements - reference the nnUNetV2 on the specifications
 
 
-def handle_first_fold_output(process, fold):
+def handle_fold_output(process, fold):
     for line in iter(process.stdout.readline, ''):
         print(f"[Fold {fold}] {line.strip()}")
     for line in iter(process.stderr.readline, ''):
@@ -47,46 +47,6 @@ def construct_nnUNet_folders(base_dir,setID,setName):
 
 
 
-def wait_for_files(file_list, timeout=6000, check_interval=10):
-    """Wait for the specific files to be created with a timeout."""
-    start_time = time.time()
-    while True:
-        if all(os.path.exists(file) for file in file_list):
-            print("All required files are created. Continuing with other folds.")
-            return True
-        if time.time() - start_time > timeout:
-            print("Timeout reached while waiting for required files.")
-            return False
-        time.sleep(check_interval)
-
-def extract_unique_names_with_npy(directory_path):
-    """
-    Extracts unique base names from files in a given directory, excluding their file extensions, 
-    and appends '.npy' to each unique name.
-    
-    Args:
-    - directory_path (str): The path to the directory containing the files.
-    
-    Returns:
-    - unique_npy_names (set): A set of unique base names with '.npy' appended.
-    """
-    unique_npy_names = set()
-
-    # Iterate through each file in the directory
-    for filename in os.listdir(directory_path):
-        # Get the base name without the extension
-        base_name = os.path.splitext(filename)[0]
-        # Append '.npy' to the base name
-        npy_name = f"{base_name}.npy"
-        # Add to the set of unique names
-        npy_name = os.path.join(directory_path,npy_name)
-        unique_npy_names.add(npy_name)
-
-
-    return list(unique_npy_names)
-
-
-
 #Their code is predominantly run through CLI - want to integrate it directly here
 # set the command and launch as a subrocess 
 # Used these defaults, but their setup is highly configurable
@@ -108,32 +68,80 @@ print(result.stdout)
 print(result.stderr)
 
 
-def train(folds,gpu_ids,setName_and_ID,setID,trainer,configuration='3d_fullres'):
-
-  preprocessed_folder = os.environ['nnUNet_preprocessed']
-  unique_names_folder = os.path.join(preprocessed_folder,setName_and_ID,'nnUNetPlans_3d_fullres')
-
-  required_files = extract_unique_names_with_npy(unique_names_folder)
+def call_training(fold,gpu_id,setName_and_ID,setID,trainer,configuration='3d_fullres'):
   
   env = os.environ.copy()
-  env['CUDA_VISIBLE_DEVICES'] = str(first_gpu_id)  # Assign specific GPU
+  env['CUDA_VISIBLE_DEVICES'] = str(gpu_id)  # Assign specific GPU
   env['nnUNet_n_proc_DA'] = '8'
+    
 
-  first_process = subprocess.Popen(
+  train_process = subprocess.Popen(
         'nnUNetv2_train',
         str(setID),
         str(configuration),
-        str(first_fold),
+        str(fold),
         '-p', 'nnUNetResEncUNetLPlans',
         '-tr', str(trainer),
         '--npz' # note that i did this by default, but may want to remove if you don't have enough space 
     ], stdout=subprocess.PIPE, stderr=subprocess.PIPE, text=True, env=env)
 
     # Start a thread to handle the output from the first fold
-    output_thread = Thread(target=handle_first_fold_output, args=(first_process, first_fold))
+    output_thread = Thread(target=handle_fold_output, args=(train_process, fold))
     output_thread.start() #handle the output 
+    output_thread.join()
 
 
+def call_predictions(fold,setName_and_ID,formatted_set_ID,imagesTsFolder,experiment,gpu_id,chk,trainer):
+
+    results_path = os.path.join(os.environ['nnUNet_raw'], setName_and_ID, f'{study}_predicted_results_{chk}_{fold}_{norm}')
+
+    if not os.path.exists(results_path):
+        os.makedirs(results_path)
+
+    command = [ 'nnUNetv2_predict',
+        '-i', imagesTsFolder,
+        '-o', results_path,
+        '-d', str(formatted_set_ID),
+        '-c', '3d_fullres',
+        '-f', str(fold),
+        '-p', 'nnUNetResEncUNetLPlans',
+        '-tr', str(trainer),
+        '-chk', f'checkpoint_{chk}.pth',
+        '--disable_progress_bar'
+    ]
+
+    env = os.environ.copy()
+    env['CUDA_VISIBLE_DEVICES'] = str(gpu_id)
+    env['DISABLE_TQDM'] = '1' #remove if you want to see the progress bar for each prediction
+    env['PYTHONUNBUFFERED'] = '1'
+
+    # Start the subprocess
+    process = subprocess.Popen(command, stdout=subprocess.PIPE, stderr=subprocess.PIPE, text=True, env=env)
+
+    # Function to handle stream reading
+    def stream_reader(stream, label):
+        for line in iter(stream.readline, ''):
+            print(f"{label}: {line.strip()}")
+        stream.close()
+
+    # Create threads to read stdout and stderr
+    # Really the simpler thing is to go into nnUNetv2 code base and stop it from printing things out
+    # i handle outputs cause it can be helpful to review/monitor progress
+    stdout_thread = threading.Thread(target=stream_reader, args=(process.stdout, "STDOUT"))
+    stderr_thread = threading.Thread(target=stream_reader, args=(process.stderr, "STDERR"))
+
+    # Start the threads
+    stdout_thread.start()
+    stderr_thread.start()
+
+    # Wait for the threads to finish
+    stdout_thread.join()
+    stderr_thread.join()
+
+    # Wait for the subprocess to complete
+    process.wait()
+
+    return process.returncode
 
 
 
