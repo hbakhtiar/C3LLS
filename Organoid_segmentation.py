@@ -1,9 +1,18 @@
 
 import os
+import SimpleITK as sitk
+import numpy as np
+from skimage.filters import threshold_triangle
 
 
-#Images should be converted to .nii.gz format before use
-#
+#function for performing triangle thresholding
+#uses threshold_triangle to get threshold, then converts image to binary
+
+def triangle_threshold(grayscale_image):
+  
+
+#Images should be converted to .nii.gz format, with only nuclear stain channel
+#Image should have format (z,y,x)
 
 images_folder = ''
 saveImage = ''
@@ -16,24 +25,17 @@ if images_2_segment_list is None:
   raise ValueError("Image folder empty or files aren't in .nii.gz format")
 
 
-for image in image_2_segment_list:
+for image_name in image_2_segment_list:
 
-    image_path = os.path.join(image_folder,image)
+    image_path = os.path.join(image_folder,image_name)
 
-    original_image = sitk.ReadImage(image_path)
-    grayscale_image = sitk.GetArrayFromImage(original_image)
+    grayscale_image = sitk.ReadImage(image_path) #obtain image
+    grayscale_image = sitk.GetArrayFromImage(grayscale_image) #convert to numpy array
 
-    segmented_cells_list=[]
-    original_names = []
-
-
-    #convert back to nparray
-    max_threshold = 0
-
-    final_image = np.zeros_like(grayscale_image)
+    max_threshold = 0 # initialize threshold
+  
+    final_image = np.zeros_like(grayscale_image) #final_image so can populate by z layer
     num_z_layers = grayscale_image.shape[0]
-
-        #convert back to nparray
 
     thresheld_image = loadFunctions.triangle_threshold(grayscale_image)
 
