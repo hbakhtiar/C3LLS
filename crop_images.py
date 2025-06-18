@@ -1,10 +1,10 @@
-from multiprocessing import shared_memory
+from multiprocessing import shared_memory,Semaphore,Manager,Queue,Process
 import numpy as np
 import SimpleITK as sitk
-from multiprocessing import Semaphore
 from skimage.measure import label, regionprops
 import gc
-
+import math
+import sys
 
 #nnUNetv2 requries specific image IDs
 # within each image, each connected component (organoid) has their own label (ID)
@@ -104,13 +104,71 @@ def process_worker(load_queue,semaphore,shm_counter_dict,shm_obj_dict,lock,shm_a
     semaphore.release()
 
 
+manager = Manager()
+shm_counter_dict = manager.dict()
+shm_obj_dict = manager.dict()
+shm_attach_counter = manager.dict()
+shm_lock = manager.Lock()
+
+segmented_organoids_folder = ''
+original_folder_path = ''
+save_dir = ''
+num_processors = ''
+num_loaders = ''
+
+segmented_organoids_files = os.listdir(segmented_organoids_folder)
+segmented_organoids_files = [file for file in segmented_organoids_files if file.endswith('.nii.gz')]
+
+image_paths_tuples_list = []
+
+for segmented_organoids_name in segmented_organoids_files:
+
+ root_name = segmented_organoids_name.split('.')[0]
+ original_name = root_name + '_0000.nii.gz'
+
+  segmented_organoid_path = os.path.join(segmented_organoids_folder,segmented_organoids_name)
+  original_organoids_path = os.path.join(original_folder_path,original_name)
+
+  image_paths_tuples_list.append((segmented_organoid_path,original_organoids_path,original_name))
 
 
+chunk_size = math.ceil(len(image_paths_tuples_list) / num_loaders)
+chunks = [image_paths_tuples_list[i * chunk_size : (i + 1) * chunk_size] for i in range(num_loaders)]
 
-    
-  
-  
+load_queue = Queue()
+semaphore = Semaphore(8)
+lock = Lock()
 
-  
+loaders = [
+    Process(target=load_worker, args=(chunk, load_queue, semaphore, num_processsors,shm_counter_dict,shm_obj_dict,lock,shm_attach_counter))
+    for chunk in chunks
+]
+
+processors = [
+    Process(target=process_worker, args=(load_queue, semaphore,shm_counter_dict,shm_obj_dict,lock,shm_attach_counter,shm_lock))
+    for _ in range(num_processsors)
+]
+
+#start all the loaders and processors
+
+for loader in loaders:
+  loader.start()
+
+for p in processors:
+  p.start()
+
+#Wait for all loaders to finish
+
+for loader in loaders:
+  loader.join()
+
+#when loaders finish , put None per processor to signal completion
+
+for _ in range(num_processors):
+  load_queue.put(None)
+
+for p in processors:
+  p.join()
+
 
 
