@@ -5,6 +5,7 @@ import numpy as np
 from skimage.filters import threshold_otsu
 from scipy.ndimage import center_of_mass,distance_transform_edt,binary_dilation
 from skimage.morphology import disk
+import pandas as pd
 
 def cantor_pair(a,b):
       return (a+b) * (a + b + 1) //2 + b
@@ -19,6 +20,8 @@ def max_distance_centroid_to_background(component_mask):
 #binary 2 = thresheld cell surface marker channel of the same organoid 
 #function takes each nucleus (binary1) and dilates it using a structuring element = to the max distance from the nucleus' centroid to background
 #if two dilated nuclei overlap, assign pixels to the closer centroid
+
+
 
 def assign_foreground_by_boundary_expansion(binary1,binary2):
       assert binary1.shape = binary2.shape
@@ -72,7 +75,20 @@ def assign_foreground_by_boundary_expansion(binary1,binary2):
             assigned_labels[z] = temp_assignment
 
       return assigned_labels
-      
+
+
+def sum_pixels_and_volume_by_label_fast(labeled_image,original_image):
+    labels = np.unique(labeled_image)
+    labels = labels[labels !=0]
+
+    pixel_sums = ndi_sum(original_image,labels = labeled_image,index = labels)
+    volumes = ndi_sum(np.ones_like(original_image),labels= labeled_image,index = labels)
+
+    return pd.Dataframe({
+        "Label": labels,
+        "PixelSum": pixel_sums,
+        "Volume": volumes
+    })
 
 
 def secondary_worker(args):
@@ -100,6 +116,22 @@ def secondary_worker(args):
     flattened_image = cell_surface_channel_cropped.flatten()
     threshold = threshold_otsu(flattened_image)
     cell_surface_channel_cropped_thresheld = cell_surface_channel_cropped > threshold
+    cell_surface_labeled_image = assign_foreground_by_boundary_expansion(segmented_organoid_cropped,cell_surface_channel_cropped_thresheld)
+    cell_surface_scores_df = sum_pixels_and_volume_by_label(cell_surface_labeled_image,cell_surface_channel_cropped)
+    results = cell_surface_scores_df.to_dict(orient='list')
+
+    with lock:
+        with open(json_output_path,"a") as f:
+            json.dump(results,f)
+            f.write('\n')
+            f.flush()
+
+    cell_surface_shm.close()
+
+    del segmented_organoid_cropped,cell_surface_labeled_image,cell_surface_channel_cropped_thresheld,cell_surface_channel_cropped
+
+    return
+
 
     
     
