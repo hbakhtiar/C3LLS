@@ -3,6 +3,8 @@ import os
 import re
 from scipy.fftpack import fftn,ifftn,fftshift,ifftshift
 from kneed import KneeLocator
+from skimage.measure import label,regionprops
+from skimage.morphology import remove_small_objects
 
 def get_2d_power_spectrum(image):
 
@@ -65,7 +67,30 @@ def apply_knee_detection_high_pass(power_spectrum):
     knee_point = detect_knee_high_pass(radial_frequencies,radial_power)
 
     return knee_point
+
+def apply_high_pass_filter(image,cutoff):
+
+    f_transform = fftn(image)
+    f_transform = fftshift(f_transfrom)
+
+    # Create high-pass filter
+    rows, cols = image.shape
+    crow, ccol = rows // 2, cols // 2
+    radius = cutoff
     
+    Y, X = np.ogrid[:rows, :cols]
+    distance = np.sqrt((X - ccol)**2 + (Y - crow)**2)
+    
+    mask = distance >= radius # high pass filter
+    f_transform_centered *= mask
+    
+    # Shift zero frequency component back
+    f_transform_filtered = ifftshift(f_transform_centered)
+    
+    # Perform inverse 2D Fourier transform
+    filtered_image = np.abs(ifftn(f_transform_filtered))
+    
+    return filtered_image    
 
 
 
@@ -74,7 +99,9 @@ def apply_knee_detection_high_pass(power_spectrum):
 # alternatively you can combine channels to grayscale as you would like
 
 grayscale_path = ''
-
+percentile = ''
+minimum_size = ''
+output_path = ''
 
 
 grayscale_image = sitk.ReadImage(grayscale_path)
@@ -90,3 +117,30 @@ for z in range(num_z_layers):
     grayscale_z = grayscale_image[z,:,:]
     power_spectrum = get_2d_power_spectrum(grayscale_z)
     knee_frequency_high_pass = apply_knee_detection_high_pass(power_spectrum)
+    high_passed_image = apply_high_pass_filter(grayscale_z,cutoff=knee_frequency_high_pass)
+
+    #threshold the layer based on the threshold defined above 
+    final_image[z,:,:] = np.where(high_passed_image > np.percentile(high_passed_image,percentile),1,0)
+
+if minimum_size is None:
+    labeled_array = skimage.measure.label(final_image,connectivity=2)
+    regions = regionprops(labeled_array)
+    volume_list = []
+
+    for region in regions:
+        volume_list.append(region.area)
+
+    volume_array = np.array(volume_list)
+    average_volume = np.mean(volume_array)
+    standard_dev = np.std(volume_array)
+
+    min_volume = average_volume + standard_dev
+
+labeled_array_filtered = remove_small_objects(labeled_array,min_size =min_volume)
+binary_mask = (labeled_array_filtered > 0).astype(np.uint8)
+
+sitk.WriteImage(binary_mask,output_path)
+
+
+
+
