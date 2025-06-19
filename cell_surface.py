@@ -156,7 +156,7 @@ def secondary_worker(args):
 
 def primary_worker(args):
 
-      sampleID,segmented_organoids_folder,compressed_name,nuclear_segmentation_path,json_output_path,lock,nii_gz_path,name,cell_surface_channel = args
+      sampleID,segmented_organoids_folder,nuclear_segmentation_path,json_output_path,lock,nii_gz_path,name,cell_surface_channel = args
 
       segmented_organoid_name = f'ORGANOID_{sampleID:03}.nii.gz'
       segmented_organoid_filepath = os.path.join(segmented_organoids_folder,segmented_organoid_name)
@@ -196,11 +196,12 @@ channels_path = ''
 
       
       
-
+##NEED TO SETUP PIPELINE
 
     
 
-args_list = [(sampleID,segmented_organoids_folder,compressed_name,nuclear_segmentation_path,json_output_path,lock,channels_path,name,cell_surface_channel) for sampleID,name in segmented_organoids_id_list]
+args_list = [(sampleID,segmented_organoids_folder,nuclear_segmentation_path,json_output_path,lock,channels_path,name,cell_surface_channel) for sampleID in segmented_organoids_id_list]
 
-
+with NonDaemonPool(processes=16) as pool:
+      pool.map(primary_worker,args_list)
 
