@@ -3,9 +3,45 @@ import SimpleITK as sitk
 from multiprocessing import shared_memory
 import numpy as np
 from skimage.filters import threshold_otsu
+from scipy.ndimage import center_of_mass
 
 def cantor_pair(a,b):
       return (a+b) * (a + b + 1) //2 + b
+
+
+#names got too long and confusing so renamed to binary1 and binary2
+#binary 1 = segmented image of an individual organoid
+#binary 2 = thresheld cell surface marker channel of the same organoid 
+#function takes each nucleus (binary1) and dilates it using a structuring element = to the max distance from the nucleus' centroid to background
+#if two dilated nuclei overlap, assign pixels to the closer centroid
+
+def assign_foreground_by_boundary_expansion(binary1,binary2):
+      assert binary1.shape = binary2.shape
+      assigned_labels = np.zeros_like(binary1,dtype=np.int32)
+
+      for z in range(binary1.shape[0]):
+            slice1 = binary1[z]
+            slice2 = binary2[z]
+
+      if not np.any(slice2):
+            continue
+
+      unique_labels = np.unique(slice1)
+      unique_labels = unique_labels[unique_labels!=0] #ignore background
+
+      temp_assignment = np.zeros_like(slice1,dtype=np.int32)
+      label_votes = np.zeros_like(slice1, dtype=np.int32)
+      label_owner = np.zeros_like(slice1, dtype=np.int32) 
+
+      centroids = {}
+
+      for label_val in unique_labels:
+            component_mask = slice1 == label_val
+            centroids[label_val] = np.array(center_of_mass(component_mask))
+            
+
+
+
 
 def secondary_worker(args):
 
