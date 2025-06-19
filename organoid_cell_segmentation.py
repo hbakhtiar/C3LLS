@@ -9,6 +9,7 @@ percentile = ''
 frequencies = ''
 sigma = ''
 remove_background = ''
+nuclear_channel = ''
 
 #You should first segment images using organoid_segmentation.py and running through nnUNetv2, and crop_images.py
 #place sample image into a folder and use this script to autosegment it
@@ -144,7 +145,10 @@ def log_gabor_3d_filter(shape, f0, sigma_f):
     return log_gabor
 
 
-grayscale_image = sitk.ReadImage(image_path)
+
+#naming is technically wrong at the start, but easier to just overwrite
+grayscale_image = sitk.ReadImage(image_path) 
+grayscale_image = grayscale[:,:,:,nuclear_channel] #again assume it is saved in z,y,x,c
 grayscale_image = sitk.GetArrayFromImage(grayscale_image)
 grayscale_image = grayscale_image.astype(np.float32) #important for FFT
 
