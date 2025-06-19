@@ -16,7 +16,7 @@ for segmented_image_name in segmented_organoids_list:
       root_name = segmented_image_name.split('.')[0]
       all_channels_name = root_name + '_allChannels.nii.gz'
 
-      segmented_organoid_path = os.path.join(segmented_organoids_folder,image_name)
+      segmented_organoid_path = os.path.join(segmented_organoids_folder,segmented_image_name)
       organoid_channels_path = os.path.join(original_image_folder,all_channels_name)
 
       segmented_organoid_cropped = sitk.ReadImage(segmented_organoid_path)
@@ -54,7 +54,15 @@ for segmented_image_name in segmented_organoids_list:
 
           components_with_overlap.append(component_id)
           break
+              
+      predicted_dead = len(components_with_overlap)
+      results = {'Organoid ID': f'{segmented_image_name}',
+                 'Dead Cell Count': predicted_dead} 
 
+      with open(json_output_path,"a") as f:
+            json.dump(results,f)
+            f.write('\n')
+            f.flush()
       
 
       
