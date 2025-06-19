@@ -5,6 +5,7 @@ from skimage.measure import label, regionprops
 import gc
 import math
 import sys
+import pickle
 
 #nnUNetv2 requries specific image IDs
 # within each image, each connected component (organoid) has their own label (ID)
@@ -116,6 +117,12 @@ save_dir = ''
 num_processors = ''
 num_loaders = ''
 
+names_dictionary_path = os.path.join(original_folder_path, 'original_unet_names_dictionary.pkl')
+
+with open(names_dictionary_path,'rb') as names_dictionary_path:
+  original_unet_names_dictionary = pickle.load(names_dictionary_path)
+
+
 segmented_organoids_files = os.listdir(segmented_organoids_folder)
 segmented_organoids_files = [file for file in segmented_organoids_files if file.endswith('.nii.gz')]
 
@@ -124,7 +131,8 @@ image_paths_tuples_list = []
 for segmented_organoids_name in segmented_organoids_files:
 
  root_name = segmented_organoids_name.split('.')[0]
- original_name = root_name + '_0000.nii.gz'
+ imageID = int(root_name.split('_')[1])
+ original_name = original_unet_names_dictionary.inv[imageID]
 
   segmented_organoid_path = os.path.join(segmented_organoids_folder,segmented_organoids_name)
   original_organoids_path = os.path.join(original_folder_path,original_name)
