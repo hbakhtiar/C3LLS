@@ -53,7 +53,7 @@ def construct_nnUNet_folders(base_dir,setID,setName):
 
 def call_preprocessing():
 
-  commmand = command = [
+  commmand = [
     'nnUNetv2_plan_and_preprocess',
     '-d', str(setID),
     '-pl','nnUNetPlannerResEncL',
