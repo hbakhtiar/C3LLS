@@ -5,7 +5,7 @@ import numpy as np
 from multiprocessing import Queue, Lock,Process
 import os
 
-
+#Run after crop images
 def find_overlap(component1, component2):
     """Finds the overlap between two components represented as masks."""
     return np.sum(np.logical_and(component1, component2))
