@@ -77,14 +77,14 @@ def process_worker(load_queue,semaphore,shm_counter_dict,shm_obj_dict,lock,shm_a
   original_organoids = np.ndarray(shape,dtype=dtype,buffer=shm.buf)
 
   zmin, ymin, xmin, zmax, ymax, xmax = bbox
-  individual_organoid = (original_organoids[zmin:zmax, ymin:ymax, xmin:xmax,:]) #original_organoids should be in z,y,x,c format
+  individual_organoid = (original_organoids[zmin:zmax, ymin:ymax, xmin:xmax]) #original_organoids should be in z,y,x,c format
 
   root_name = original_name.split('.')[0]
   sampleID = int(root_name.split('_')[1])
 
   unique_organoid_id = cantor_pair(sampleID,label) #Note: sampleID comes first -- ORDER matters in this function
 
-  organoid_name = 'JAXLAB_' + f'{unique_organoid_id:03}' + '_0000.nii.gz'
+  organoid_name = 'ORGANOIDS_' + f'{unique_organoid_id:03}' + '_0000.nii.gz'
 
   # Save cropped
   output_path = os.path.join(save_dir,organoid_name)
