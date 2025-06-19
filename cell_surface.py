@@ -1,11 +1,13 @@
 import os
 import SimpleITK as sitk
-from multiprocessing import shared_memory
+from multiprocessing import shared_memory,Process
 import numpy as np
+from skimage.measure import regionprops,label
 from skimage.filters import threshold_otsu
 from scipy.ndimage import center_of_mass,distance_transform_edt,binary_dilation
 from skimage.morphology import disk
 import pandas as pd
+import gc
 
 def cantor_pair(a,b):
       return (a+b) * (a + b + 1) //2 + b
@@ -13,6 +15,25 @@ def cantor_pair(a,b):
 def max_distance_centroid_to_background(component_mask):
       dist = distance_transform_edt(component_mask)
       return np.max(dist)
+
+
+# Custom Process class to override the daemon flag
+#I use this, but you should make sure that your server can handle
+#if not, just use a regular pool with multiprocessing
+class NonDaemonProcess(multiprocessing.Process):
+    def _get_daemon(self):
+        return False
+    def _set_daemon(self, value):
+        pass
+    daemon = property(_get_daemon, _set_daemon)
+
+# Custom Pool class that uses NonDaemonProcess
+class NonDaemonPool(Pool):
+    def Process(self, *args, **kwargs):
+        proc = super().Process(*args, **kwargs)
+        proc.__class__ = NonDaemonProcess
+        return proc
+
 
 
 #names got too long and confusing so renamed to binary1 and binary2
@@ -133,8 +154,53 @@ def secondary_worker(args):
     return
 
 
+def primary_worker(args):
+
+      sampleID,segmented_organoids_folder,compressed_name,nuclear_segmentation_path,json_output_path,lock,nii_gz_path,name,cell_surface_channel = args
+
+      segmented_organoid_name = f'ORGANOID_{sampleID:03}.nii.gz'
+      segmented_organoid_filepath = os.path.join(segmented_organoids_folder,segmented_organoid_name)
+
+      segmented_organoids = sitk.ReadImage(segmented_organoid_file_path)
+      segmented_organoids = sitk.GetArrayFromImage(segmented_organoids)
+
+      segmented_organoids = skimage.measure.label(segmented_organoids,connectivity=2)
+      properties = skimage.measure.regionprops(segmented_organoids)
+
+
+      cell_surface_name = f'ORGANOIDS_{sampleID:03}_{cell_surface_channel:04}.nii.gz'
+      cell_surface_path = os.path.join(channels_path,cell_surface_name)
+      cell_surface_channel = sitk.ReadImage(cell_surface_path)
+      cell_surface_channel = sitk.GetArrayFromImage(cell_surface_channel)
+
+      #create shared memory object for the image of the channel
+      shm_surface = shared_memory.SharedMemory(create = True,size = cell_surface_channel.nbytes)
+      surface_shm_array = np.ndarray(cell_surface_channel.shape,dtype=cell_surface_channel.dtype,buffer=shm_surface.buf)
+
+      args_list = [(prop.label,prop.bbox,shm_surface.name,cell_surface_channel.dtype,cell_surface_channel.shape,nuclear_segmentation_path,sampleID,json_output_path,lock,name) for prop in properties]
+
+      with NonDaemonPool(processes=8) as pool:
+            pool.map(secondary_worker,args_list)
+
+      shm_surface.close()
+      shm_surface.unlink()
+
+      del cell_surface_channel,segmented_organoids,segmented_organoids_objects_removed
+      gc.collect()
+
+      return
+
+
+segmented_organoids_folder= ''
+channels_path = ''
+
+      
+      
+
+
     
-    
-    
+
+args_list = [(sampleID,segmented_organoids_folder,compressed_name,nuclear_segmentation_path,json_output_path,lock,channels_path,name,cell_surface_channel) for sampleID,name in segmented_organoids_id_list]
+
 
 
