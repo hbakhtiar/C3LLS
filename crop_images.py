@@ -76,7 +76,7 @@ def process_worker(load_queue,semaphore,shm_counter_dict,shm_obj_dict,lock,shm_a
   original_organoids = np.ndarray(shape,dtype=dtype,buffer=shm.buf)
 
   zmin, ymin, xmin, zmax, ymax, xmax = bbox
-  individual_organoid = (original_organoids[zmin:zmax, ymin:ymax, xmin:xmax])
+  individual_organoid = (original_organoids[zmin:zmax, ymin:ymax, xmin:xmax,:]) #original_organoids should be in z,y,x,c format
 
   root_name = original_name.split('.')[0]
   sampleID = int(root_name.split('_')[1])
