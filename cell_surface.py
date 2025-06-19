@@ -3,10 +3,15 @@ import SimpleITK as sitk
 from multiprocessing import shared_memory
 import numpy as np
 from skimage.filters import threshold_otsu
-from scipy.ndimage import center_of_mass
+from scipy.ndimage import center_of_mass,distance_transform_edt,binary_dilation
+from skimage.morphology import disk
 
 def cantor_pair(a,b):
       return (a+b) * (a + b + 1) //2 + b
+
+def max_distance_centroid_to_background(component_mask):
+      dist = distance_transform_edt(component_mask)
+      return np.max(dist)
 
 
 #names got too long and confusing so renamed to binary1 and binary2
@@ -23,24 +28,51 @@ def assign_foreground_by_boundary_expansion(binary1,binary2):
             slice1 = binary1[z]
             slice2 = binary2[z]
 
-      if not np.any(slice2):
-            continue
+            if not np.any(slice2):
+                  continue
+      
+            unique_labels = np.unique(slice1)
+            unique_labels = unique_labels[unique_labels!=0] #ignore background
+      
+            temp_assignment = np.zeros_like(slice1,dtype=np.int32)
+            label_votes = np.zeros_like(slice1, dtype=np.int32)
+            label_owner = np.zeros_like(slice1, dtype=np.int32) 
+      
+            centroids = {}
+      
+            for label_val in unique_labels:
+                  component_mask = slice1 == label_val
+                  centroids[label_val] = np.array(center_of_mass(component_mask))
+                  max_dist = max_distance_centroid_to_background(component_mask)
+                  selem = disk(max_dist)
+                  dilated = binary_dilation(component_mask,selem)
+      
+                  overlap = dilated & slice2.astype(bool)
+                  overlap = dilated
+      
+                  label_owner[overlap] = label_val
+                  label_votes[overlap] += 1
+                  
+                  temp_assignment[overlap] = label_val
+      
+            conflict_mask = label_votes > 1
+            conflict_coords = np.column_stack(np.nonzero(conflict_mask))
+      
+            for y, x in conflict_coords:
+                  distances = []
+                  for label_val in unique_labels:
+                        if (label_val == label_owner[y,x]):
+                              centroid = centroids[label_val]
+                              dist = np.linalg.norm(np.array([y,x])-centroid)
+                              distances.append([dist,label_val])
+                        if distances:
+                              closest_label = min(distances)[1]
+                              temp_assignment[y,x] = closest_label
+      
+            assigned_labels[z] = temp_assignment
 
-      unique_labels = np.unique(slice1)
-      unique_labels = unique_labels[unique_labels!=0] #ignore background
-
-      temp_assignment = np.zeros_like(slice1,dtype=np.int32)
-      label_votes = np.zeros_like(slice1, dtype=np.int32)
-      label_owner = np.zeros_like(slice1, dtype=np.int32) 
-
-      centroids = {}
-
-      for label_val in unique_labels:
-            component_mask = slice1 == label_val
-            centroids[label_val] = np.array(center_of_mass(component_mask))
-            
-
-
+      return assigned_labels
+      
 
 
 def secondary_worker(args):
