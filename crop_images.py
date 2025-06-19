@@ -84,7 +84,7 @@ def process_worker(load_queue,semaphore,shm_counter_dict,shm_obj_dict,lock,shm_a
 
   unique_organoid_id = cantor_pair(sampleID,label) #Note: sampleID comes first -- ORDER matters in this function
 
-  organoid_name = 'ORGANOIDS_' + f'{unique_organoid_id:03}' + '_0000.nii.gz'
+  organoid_name = 'ORGANOIDS_' + f'{unique_organoid_id:03}' + '_all_channels.nii.gz'
 
   # Save cropped
   output_path = os.path.join(save_dir,organoid_name)
