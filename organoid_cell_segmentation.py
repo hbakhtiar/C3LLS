@@ -1,6 +1,6 @@
 import os
 import SimpleITK as sitk
-from scipy.fftpack import fftn, fftshift
+from scipy.fftpack import fftn, fftshift,ifftn
 from kneed import KneeLocator
 
 image_path = ''
