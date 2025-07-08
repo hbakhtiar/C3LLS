@@ -1,0 +1,2 @@
+[console_scripts]
+run_c3lls = C3LLS.main:main_menu

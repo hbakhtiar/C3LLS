@@ -1,0 +1,27 @@
+[project]
+name = "C3LLS"
+version = "0.1.0"
+description = "Deep Learning Cellular 3D Laboratory Labeling System"
+authors =[
+
+    {name = "Hamza Bakhtiar", email = "hbakhtiar@wisc.edu"}
+
+]
+
+readme = "README.md"
+requires-python = ">=3.9"
+
+dependencies = [
+    "SimpleITK",
+    "numpy",
+    "scikit-image",
+    "scipy",
+    "kneed",
+    "pandas",
+    "nnunetv2"
+]
+
+[project.scripts]
+
+run_c3lls = "C3LLS.main:main_menu"
+

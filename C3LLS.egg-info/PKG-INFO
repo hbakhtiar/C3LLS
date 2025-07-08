@@ -1,0 +1,14 @@
+Metadata-Version: 2.4
+Name: C3LLS
+Version: 0.1.0
+Summary: Deep Learning Cellular 3D Laboratory Labeling System
+Author-email: Hamza Bakhtiar <hbakhtiar@wisc.edu>
+Requires-Python: >=3.9
+Description-Content-Type: text/markdown
+Requires-Dist: SimpleITK
+Requires-Dist: numpy
+Requires-Dist: scikit-image
+Requires-Dist: scipy
+Requires-Dist: kneed
+Requires-Dist: pandas
+Requires-Dist: nnunetv2

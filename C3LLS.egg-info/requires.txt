@@ -1,0 +1,7 @@
+SimpleITK
+numpy
+scikit-image
+scipy
+kneed
+pandas
+nnunetv2
