@@ -17,4 +17,5 @@ The C3LLS pipeline has two main parts
 
 To review a step-by-step guide, select one of the below options based on your experience level:
 
-
+1. [I am new to AI](/Documentation/New to AI)
+2. [I have experience in AI](/Documentation/AI Experienced)
