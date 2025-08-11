@@ -15,13 +15,20 @@ C3LLS takes care of this by allowing you to make your own training data, specifi
 	b. [Model that identifies nuclei within organoids](#Training-Data-for-Finding-Nuclei-in-Organoids)  
 	c. [Model that identifies individual cells (not within an organoid)](#Training-Data-for-Finding-Cells (not within an organoid))
 
+
+
 ## Training Data for Finding Organoids
 
-1. Select 'Auto seg an individual image' (to create training data in mass, click here)
+1. Select 'Auto seg an individual image' (to create training data en masse, click here)
 2. Enter the image file path and output path (where you would like to save the segmented image)
-3. Minimum_size - this is the smallest size organoid you would like to keep. This should be an integer value and should be the number of voxels.
+3. Minimum_size - this is the smallest size organoid you would like to keep. This should be an integer value and should be the number of voxels. Organoids smaller than this size will be removed. 
 4. Sigma - this determines how intensely you would like to merge nearby objects. A larger value will merge more distant objects, while smaller values will only merge close objects. Recommend starting with default and adjusting accordingly
    
 ## Training Data for Finding Nuclei in Organoids
+
+1. Select 'Auto seg an individual image' (to create training data en masse, click here)
+2. Enter the image file path and output path (where you would like to save the segmented image)
+3. Percentile - decides how high the cutoff should be by keeping only the relatively brightest parts of the image
+4. Sigma - (not the same as sigma for organoids!) determines how much detail you would like to segment. A _higher_ value will extract _less_ detail, while a _smaller_ value will extract _more_ detail
 
 ## Training Data for Finding Cells (not within an organoid)
