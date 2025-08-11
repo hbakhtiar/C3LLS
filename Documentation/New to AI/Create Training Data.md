@@ -8,4 +8,11 @@ C3LLS takes care of this by allowing you to make your own training data, specifi
 
 1. Select a group of example images. I would recommend at least one image from each experimental condition, or at least one image from each cell line/patient you would like to count.
 2. Place all these images into a folder of your choice
-3. In the terminal, enter run_c3lls and select option 1. '
+3. In the terminal, enter run_c3lls and select option 1. 'Create Training Data'
+4. Depending on what you like to make your model for, select one of the following:
+
+	a. [Model that identifies organoids](# Training Data for Finding Organoids)
+	b. Model that identifies nuclei within an organoid
+	c. Model that identifies individual cells (not within an organoid)
+
+## Training Data for Finding Organoids
