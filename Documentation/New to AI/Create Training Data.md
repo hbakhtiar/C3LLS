@@ -11,7 +11,7 @@ C3LLS takes care of this by allowing you to make your own training data, specifi
 3. In the terminal, enter run_c3lls and select option 1. 'Create Training Data'
 4. Depending on what you like to make your model for, select one of the following:
 
-	a. [Model that identifies organoids](# Training Data for Finding Organoids)
+	a. [Model that identifies organoids](#Training-Data-for-Finding-Organoids)
 	b. Model that identifies nuclei within an organoid
 	c. Model that identifies individual cells (not within an organoid)
 
