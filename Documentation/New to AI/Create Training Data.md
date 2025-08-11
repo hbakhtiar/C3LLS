@@ -29,6 +29,11 @@ C3LLS takes care of this by allowing you to make your own training data, specifi
 1. Select 'Auto seg an individual image' (to create training data en masse, click here)
 2. Enter the image file path and output path (where you would like to save the segmented image)
 3. Percentile - decides how high the cutoff should be by keeping only the relatively brightest parts of the image
-4. Sigma - (not the same as sigma for organoids!) determines how much detail you would like to segment. A _higher_ value will extract _less_ detail, while a _smaller_ value will extract _more_ detail
+4. max frequency - used in combination with sigma, determines how much detail you would like to segment. Here, _higher_ values will extract _more_ detail, while _smaller_ values will extract less detail
+5. Sigma - (not the same as sigma for organoids!) determines how much detail you would like to segment. A _higher_ value will extract _less_ detail, while a _smaller_ value will extract _more_ detail
+6. Remove background - Apply an optional filter to remove the background. Might work to remove noise, but might cutoff parts of foreground you would like to keep
+
+
 
 ## Training Data for Finding Cells (not within an organoid)
+
