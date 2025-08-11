@@ -8,4 +8,4 @@ C3LLS takes care of this by allowing you to make your own training data, specifi
 
 1. Select a group of example images. I would recommend at least one image from each experimental condition, or at least one image from each cell line/patient you would like to count.
 2. Place all these images into a folder of your choice
-3. 
+3. In the terminal, enter run_c3lls and select option 1. '
