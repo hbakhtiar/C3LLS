@@ -37,3 +37,8 @@ C3LLS takes care of this by allowing you to make your own training data, specifi
 
 ## Training Data for Finding Cells (not within an organoid)
 
+1. Select 'Auto seg an individual image' (to create training data en masse, click here)
+2. Enter the image file path and output path (where you would like to save the segmented image)
+3. Minimum size - smallest sized cell you want to keep. This should be an integer (the number of voxels)
+4. Percentile - how bright of regions you would like to keep. If set very high, the image will only keep the relatively brightest regions.
+
