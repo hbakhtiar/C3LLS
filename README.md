@@ -15,4 +15,6 @@ The C3LLS pipeline has two main parts
 1. Human-reviewed auto-segmentation, which allows for quick creation of datasest-specific training data
 2. Automated CNN model construction and training to create a dataset specific segmentation model
 
+To review a step-by-step guide, select one of the below options based on your experience level:
+
 
