@@ -18,7 +18,7 @@ The program should then run preprocessing on your images. Once completed it shou
 
 ## Training
 
-Once the model has finished 
+Once the model has finished preprocessing
 
 1. Select 'Train previously preprocessed model'
 2. Enter the same set name and set id as above
