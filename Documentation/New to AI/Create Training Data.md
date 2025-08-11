@@ -15,7 +15,7 @@ I recommend having at least one training image per experiment or cell line.
 
 	a. [Model that identifies organoids](#Training-Data-for-Finding-Organoids)  
 	b. [Model that identifies nuclei within organoids](#Training-Data-for-Finding-Nuclei-in-Organoids)  
-	c. [Model that identifies individual cells (not within an organoid)](#Training-Data-for-Finding-Cells (not within an organoid))
+	c. [Model that identifies individual cells (not within an organoid)](#Training-Data-for-Finding-Cells-(not-within-an-organoid))
 
 
 
