@@ -12,7 +12,7 @@ C3LLS takes care of this by allowing you to make your own training data, specifi
 4. Depending on what you like to make your model for, select one of the following:
 
 	a. [Model that identifies organoids](#Training-Data-for-Finding-Organoids)
-	b. Model that identifies nuclei within an organoid
+	b. Model that identifies nuclei within organoids
 	c. Model that identifies individual cells (not within an organoid)
 
 ## Training Data for Finding Organoids
