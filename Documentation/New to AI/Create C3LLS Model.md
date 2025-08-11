@@ -14,4 +14,11 @@ If you have not already made training data for your model, click [here](https://
 
 The program should then run preprocessing on your images. Once completed it should return to the menu. 
 
-1. Select '
+1. Select 'Train previously preprocessed model'
+2. Enter the same set name and set id as above
+3. Follow the remaining prompts
+4. If uncertain on the 'fold' simply enter 0.
+
+Congrats! The model is writing and learning on it's own.
+
+Once it has completed you can move on to [running predictions].
