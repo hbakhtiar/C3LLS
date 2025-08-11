@@ -13,8 +13,10 @@ C3LLS takes care of this by allowing you to make your own training data, specifi
 
 	a. [Model that identifies organoids](#Training-Data-for-Finding-Organoids)  
 	b. [Model that identifies nuclei within organoids](#Training-Data-for-Finding-Nuclei-in-Organoids)  
-	c. Model that identifies individual cells (not within an organoid) 
+	c. [Model that identifies individual cells (not within an organoid)](#Training-Data-for-Finding-Cells (not within an organoid))
 
 ## Training Data for Finding Organoids
 
 ## Training Data for Finding Nuclei in Organoids
+
+## Training Data for Finding Cells (not within an organoid)
