@@ -29,3 +29,10 @@ Congrats! The model is writing and learning on it's own. Depending on the size o
 
 ## Predicting
 
+Once the model has finished training
+
+1. Starting at the main C3LLS menu, select '3. Predict from existing model'
+2. Follow the prompts, the fold should be the same used for training
+3. Indicate the type of model you are predicting (e.g. segmenting whole organoids, nuclei within an organoid)
+
+Predictions should then start!
