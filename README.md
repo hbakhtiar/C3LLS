@@ -8,6 +8,22 @@ C3LLS can
 4. Quantify the cell surface marker expression of an independent cell, a cell in an organoid, or an entire organoid
 5. Identify invdividual cells in a 3D images
 
+## Installation Steps
+
+1. Install Python
+* You need Python 3.10.2 or newer installed
+* To see your version of python, open the Terminal (Mac or Linux) or Command Prompt (Windows) and enter
+
+```bash
+python --version
+```
+
+or 
+
+```bash
+python3 --version
+```
+
 ## How Does C3LLS Work?
 
 The C3LLS pipeline has two main parts
@@ -19,5 +35,9 @@ To review a step-by-step guide, select one of the below options based on your ex
 
 1. [I am new to AI](https://github.com/hbakhtiar/C3LLS/tree/main/Documentation/New%20to%20AI)
 2. [I have experience in AI](https://github.com/hbakhtiar/C3LLS/tree/main/Documentation/AI%20Experienced)
+
+
+
+
 
 
