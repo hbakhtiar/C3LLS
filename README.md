@@ -67,6 +67,7 @@ Now copy and paste the following into your terminal
 
 ```bash
 pip install git+h
+```
 
 ## How Does C3LLS Work?
 
@@ -79,6 +80,7 @@ To review a step-by-step guide, select one of the below options based on your ex
 
 1. [I am new to AI](https://github.com/hbakhtiar/C3LLS/tree/main/Documentation/New%20to%20AI)
 2. [I have experience in AI](https://github.com/hbakhtiar/C3LLS/tree/main/Documentation/AI%20Experienced)
+
 
 
 
