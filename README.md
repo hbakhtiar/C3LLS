@@ -66,8 +66,20 @@ source venv/bin/activate
 Now copy and paste the following into your terminal
 
 ```bash
-pip install git+h
+pip install git+https://github.com/hbakhtiar/C3LLS.git@main
 ```
+
+### 6. Enter the below code
+```bash
+run_c3lls
+```
+
+The C3LLS main menu should now appear in the terminal!
+
+Now, anytime you want to use C3LLS:
+1. Open the terminal
+2. Activate your virtual environment (step 4 above)
+3. type run_c3lls into the terminal (step 6 above)
 
 ## How Does C3LLS Work?
 
@@ -80,6 +92,7 @@ To review a step-by-step guide, select one of the below options based on your ex
 
 1. [I am new to AI](https://github.com/hbakhtiar/C3LLS/tree/main/Documentation/New%20to%20AI)
 2. [I have experience in AI](https://github.com/hbakhtiar/C3LLS/tree/main/Documentation/AI%20Experienced)
+
 
 
 
