@@ -24,6 +24,9 @@ or
 python3 --version
 ```
 
+If you don't have python installed, you can download it here
+[https://www.python.org/downloads/](https://www.python.org/downloads/)
+
 ## How Does C3LLS Work?
 
 The C3LLS pipeline has two main parts
@@ -35,6 +38,7 @@ To review a step-by-step guide, select one of the below options based on your ex
 
 1. [I am new to AI](https://github.com/hbakhtiar/C3LLS/tree/main/Documentation/New%20to%20AI)
 2. [I have experience in AI](https://github.com/hbakhtiar/C3LLS/tree/main/Documentation/AI%20Experienced)
+
 
 
 
