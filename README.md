@@ -47,6 +47,27 @@ python -m venv venv
 
 on some systems you may need to use python3 instead of python
 
+### 4. Activate the virtual environment
+
+If you are using Windows, enter
+
+```bash
+venv\Scripts\activate
+```
+
+If you are using Mac/Linux, enter
+```bash
+source venv/bin/activate
+```
+(venv) should appear at the start of your terminal line
+
+### 5. Install the Package
+
+Now copy and paste the following into your terminal
+
+```bash
+pip install git+h
+
 ## How Does C3LLS Work?
 
 The C3LLS pipeline has two main parts
@@ -58,6 +79,7 @@ To review a step-by-step guide, select one of the below options based on your ex
 
 1. [I am new to AI](https://github.com/hbakhtiar/C3LLS/tree/main/Documentation/New%20to%20AI)
 2. [I have experience in AI](https://github.com/hbakhtiar/C3LLS/tree/main/Documentation/AI%20Experienced)
+
 
 
 
