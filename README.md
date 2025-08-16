@@ -61,7 +61,7 @@ source venv/bin/activate
 ```
 (venv) should appear at the start of your terminal line
 
-### 5. Install the Package
+### 5. Install the package
 
 Now copy and paste the following into your terminal
 
@@ -92,6 +92,7 @@ To review a step-by-step guide, select one of the below options based on your ex
 
 1. [I am new to AI](https://github.com/hbakhtiar/C3LLS/tree/main/Documentation/New%20to%20AI)
 2. [I have experience in AI](https://github.com/hbakhtiar/C3LLS/tree/main/Documentation/AI%20Experienced)
+
 
 
 
