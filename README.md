@@ -88,22 +88,6 @@ The C3LLS pipeline has two main parts
 1. Human-reviewed auto-segmentation, which allows for quick creation of datasest-specific training data
 2. Automated CNN model construction and training to create a dataset specific segmentation model
 
-To review a step-by-step guide, select one of the below options based on your experience level:
+To review a step-by-step guide click here: [Get Started](https://github.com/hbakhtiar/C3LLS/blob/main/Documentation/Create%20Training%20Data.md)
 
-1. [I am new to AI](https://github.com/hbakhtiar/C3LLS/tree/main/Documentation/New%20to%20AI)
-2. [I have experience in AI](https://github.com/hbakhtiar/C3LLS/tree/main/Documentation/AI%20Experienced)
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
+For users with experience in AI, we have additional ways to modify the pipeline that can be found [here](https://github.com/hbakhtiar/C3LLS/tree/main/Documentation/AI%20Experienced)
