@@ -1,4 +1,4 @@
-# Adjusting Training Schedules in C3LLS
+# Adjusting C3LLS
 
 For users with experience in AI, the C3LLS pipeline is modifiable. 
 
@@ -6,7 +6,12 @@ The backbone of C3LLS (pre-processing, training, and predictions) are done withi
 
 This page reviews common questions that might come up with adjusting model architecture/hyper-parameters.
 
-## How to adjust model hyperparameters?
+## How to adjust pre-processing
+
+
+
+
+## How to adjust training hyperparameters?
 
 Training within nnUNetV2 is built around a base training [class](https://github.com/MIC-DKFZ/nnUNet/blob/master/nnunetv2/training/nnUNetTrainer/nnUNetTrainer.py). This defines strategies for 
 
