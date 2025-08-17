@@ -15,9 +15,3 @@ Once you have trained and predicted model, follow these steps to count dead nucl
 5. 'Percent Covered' indicates what percent volume of a nucleus need the death marker to be marked as dead
 
 You can *technically* use this to quantify the number of cells with *any* type of nuclear stain. However, this has only been validated on nuclear death marker stains
-
-## Counting Dead Nuclei (alternative approach)
-
-An alternative, but more involved method, to quantify death counts is by using [region-based training](https://github.com/MIC-DKFZ/nnUNet/blob/master/documentation/region_based_training.md) in nnUNetV2
-
-
