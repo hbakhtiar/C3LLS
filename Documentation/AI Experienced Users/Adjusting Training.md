@@ -20,6 +20,6 @@ Training within nnUNetV2 is built around a base training [class](https://github.
 
 The most straightforward way to adjust hyper-parameters is through class inheritance. Examples can be found [here](https://github.com/MIC-DKFZ/nnUNet/blob/master/nnunetv2/training/nnUNetTrainer/variants/training_length/nnUNetTrainer_Xepochs.py) for adjusting training length.
 
-Likewise, you can define your own data augmentation strategies, loss functions, LR schedulers, following the example [here](https://github.com/MIC-DKFZ/nnUNet/blob/master/nnunetv2/training/nnUNetTrainer/variants/lr_schedule/nnUNetTrainerCosAnneal.py)
+Likewise, you can define your own data augmentation strategies, loss functions, LR schedulers, etc. following the example [here](https://github.com/MIC-DKFZ/nnUNet/blob/master/nnunetv2/training/nnUNetTrainer/variants/lr_schedule/nnUNetTrainerCosAnneal.py)
 
 
