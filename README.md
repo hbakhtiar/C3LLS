@@ -90,4 +90,3 @@ The C3LLS pipeline has two main parts
 
 To review a step-by-step guide click here: [Get Started](https://github.com/hbakhtiar/C3LLS/blob/main/Documentation/Create%20Training%20Data.md)
 
-For users with experience in AI, we have additional ways to modify the pipeline that can be found [here](https://github.com/hbakhtiar/C3LLS/tree/main/Documentation/AI%20Experienced)
