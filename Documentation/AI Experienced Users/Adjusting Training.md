@@ -4,7 +4,7 @@ For users with experience in AI, the C3LLS pipeline is modifiable.
 
 The backbone of C3LLS (pre-processing, training, and predictions) are done within [nnUNetv2](https://github.com/MIC-DKFZ/nnUNet)
 
-This page reviews common questions that might come up with adjusting model architecture/hyper-parameters.
+This page reviews common questions that might come up with adjusting model architecture/hyper-parameters. For in depth questions reference the nnUNet link above (they have excellent documentation).
 
 ## How to adjust pre-processing
 
