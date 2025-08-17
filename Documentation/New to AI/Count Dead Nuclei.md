@@ -18,6 +18,6 @@ You can *technically* use this to quantify the number of cells with *any* type o
 
 ## Counting Dead Nuclei (alternative approach)
 
-
+An alternative, but more involved method, to quantify death counts is by using [region-based training](https://github.com/MIC-DKFZ/nnUNet/blob/master/documentation/region_based_training.md) in nnUNetV2
 
 
