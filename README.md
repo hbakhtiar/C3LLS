@@ -1,5 +1,5 @@
 # C3LLS: Deep Learning Cellular 3D Laboratory Labeling System
-Welcome to C3LLS, an open-source semi-automatated approach for researchers with limited AI expertise to create their own model for organoid, nuclear, and cell segmentation! 
+Welcome to C3LLS, an open-source semi-automatated approach for researchers with limited AI expertise to create their own model for 3D organoid, nuclear, and cell segmentation! 
 
 C3LLS can 
 1. Identify organoid in an image 
@@ -92,6 +92,7 @@ To review a step-by-step guide, select one of the below options based on your ex
 
 1. [I am new to AI](https://github.com/hbakhtiar/C3LLS/tree/main/Documentation/New%20to%20AI)
 2. [I have experience in AI](https://github.com/hbakhtiar/C3LLS/tree/main/Documentation/AI%20Experienced)
+
 
 
 
