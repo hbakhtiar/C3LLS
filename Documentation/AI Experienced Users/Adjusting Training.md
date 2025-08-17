@@ -1,10 +1,25 @@
-## Customizable Training Data
+# Adjusting Training Schedules in C3LLS
 
-A primary limitation of 3D organoid segmentation models is building a robust, diverse training dataset. This typically involves manual segmentation which is exceedingly time-consuming. 
+For users with experience in AI, the C3LLS pipeline is modifiable. 
 
-C3LLS gets around this by leveraging a computational approach to quickly make a dataset-specific training dataset. 
+The backbone of C3LLS (pre-processing, training, and predictions) are done within [nnUNetv2](https://github.com/MIC-DKFZ/nnUNet)
 
-## Using C3LLS to Make Training Data
+This page reviews common questions that might come up with adjusting model architecture/hyper-parameters.
 
-C3LLS lets users create dataset-specific training data. This is done using a semi-automated algorithm with adjustable parameters. To get started follow the instructions [here](https://github.com/hbakhtiar/C3LLS/blob/main/Documentation/Create%20Training%20Data.md) on creating a training dataset.
+## How to adjust model hyperparameters?
+
+Training within nnUNetV2 is built around a base training [class](https://github.com/MIC-DKFZ/nnUNet/blob/master/nnunetv2/training/nnUNetTrainer/nnUNetTrainer.py). This defines strategies for 
+
+* Data augmentation
+* Loss functions
+* LR schedulers
+* Network architectures
+* Optimizer
+* Training Length
+* A list of hyper-parameters found [here](https://github.com/MIC-DKFZ/nnUNet/blob/master/nnunetv2/training/nnUNetTrainer/nnUNetTrainer.py#L144)
+
+The most straightforward way to adjust hyper-parameters is through class inheritance. Examples can be found [here](https://github.com/MIC-DKFZ/nnUNet/blob/master/nnunetv2/training/nnUNetTrainer/variants/training_length/nnUNetTrainer_Xepochs.py) for adjusting training length.
+
+Likewise, you can define your own data augmentation strategies, loss functions, LR schedulers, following the example [here](https://github.com/MIC-DKFZ/nnUNet/blob/master/nnunetv2/training/nnUNetTrainer/variants/lr_schedule/nnUNetTrainerCosAnneal.py)
+
 
