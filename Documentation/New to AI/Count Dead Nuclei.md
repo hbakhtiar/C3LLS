@@ -8,7 +8,7 @@ If you haven't started making a model, click [here](https://github.com/hbakhtiar
 
 Once you have trained and predicted model, follow these steps to count dead nuclei
 
-1. Launch run_c3lls main menu
+1. Launch the run_c3lls main menu
 2. Select option 4. Count Dead Nuclei (needs a trained nuclear model)
 3. Follow the prompts for the folders containing the original and segmented organoid images
 4. The JSON file will save the data with an organoid ID and the number of dead cells identified
