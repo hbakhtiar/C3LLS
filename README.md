@@ -8,6 +8,10 @@ C3LLS can
 4. Quantify the cell surface marker expression of an independent cell, a cell in an organoid, or an entire organoid
 5. Identify invdividual cells in 3D images
 
+## Data and Models
+
+Training data and the associated models are accessible on [google drive](https://drive.google.com/drive/folders/1MpqAHLRZ_ufEHJCVzV0tzWSxjPqiDc2q?usp=drive_link)
+
 ## Installation Steps
 
 ### 1. Install Python
@@ -89,4 +93,5 @@ The C3LLS pipeline has two main parts
 2. Automated CNN model construction and training to create a dataset specific segmentation model
 
 To review a step-by-step guide click here: [Get Started](https://github.com/hbakhtiar/C3LLS/blob/main/Documentation/Create%20Training%20Data.md)
+
 
